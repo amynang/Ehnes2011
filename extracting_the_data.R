@@ -31,8 +31,8 @@ ehnes = ehnes %>%
 # ℹ NAs introduced by coercion
 
 # these two were the offending cases, for reasons
-ehnes[2370,10] = 2.0
-ehnes[2371,10] = 2.0
+ehnes["2370",10] = 2.0
+ehnes["2371",10] = 2.0
 
 write.csv(ehnes, "Ehnes2011.csv", 
           row.names = F)
