@@ -35,6 +35,9 @@ ehnes = ehnes %>%
 ehnes["2370",10] = 2.0
 ehnes["2371",10] = 2.0
 
+
+ehnes = ehnes %>% add_column(.before = "Species",
+                             Genus = str_split(ehnes$Species, " ", simplify = T)[,1])
 # resolving typos in taxonomy
 typo = taxize::resolve(unique(ehnes$Genus),
                        db = 'gnr')
@@ -43,13 +46,11 @@ change = typo$gnr[str_detect(typo$gnr$matched_name, " ", negate = TRUE) &
                     typo$gnr$data_source_title == "National Center for Biotechnology Information" &
                     typo$gnr$score < .6, ]
 
-ehnes = ehnes %>% add_column(.before = "Species",
-                             Genus = str_split(ehnes$Species, " ", simplify = T)[,1]) %>% 
-                  mutate(Genus = case_when(Genus %in% change$user_supplied_name ~ 
+ehnes = ehnes %>% mutate(Genus = case_when(Genus %in% change$user_supplied_name ~ 
                                              change$matched_name[match(ehnes$Genus,
                                                                        change$user_supplied_name)],
                                            TRUE ~ Genus))
-
+ehnes$Genus[ehnes$Genus == "PSeudophonus"] = "Pseudophonus"
 write.csv(ehnes, "Ehnes2011.csv", 
           row.names = F)
 
