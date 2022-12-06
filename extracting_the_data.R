@@ -1,7 +1,8 @@
 # remotes::install_github(c("ropensci/tabulizerjars", "ropensci/tabulizer"), INSTALL_opts = "--no-multiarch")
 library(rJava)      
 library(tabulizer)  
-library(tidyverse)  
+library(tidyverse)
+library(stringr)
 
 # extract data from supplement
 ehnes0 = extract_tables("https://onlinelibrary.wiley.com/action/downloadSupplement?doi=10.1111%2Fj.1461-0248.2011.01660.x&file=ELE_1660_sm_Meta-scaling-Appendix.pdf",
@@ -33,6 +34,21 @@ ehnes = ehnes %>%
 # these two were the offending cases, for reasons
 ehnes["2370",10] = 2.0
 ehnes["2371",10] = 2.0
+
+# resolving typos in taxonomy
+typo = taxize::resolve(unique(ehnes$Genus),
+                       db = 'gnr')
+#View(typo$gnr)  
+change = typo$gnr[str_detect(typo$gnr$matched_name, " ", negate = TRUE) & 
+                    typo$gnr$data_source_title == "National Center for Biotechnology Information" &
+                    typo$gnr$score < .6, ]
+
+ehnes = ehnes %>% add_column(.before = "Species",
+                             Genus = str_split(ehnes$Species, " ", simplify = T)[,1]) %>% 
+                  mutate(Genus = case_when(Genus %in% change$user_supplied_name ~ 
+                                             change$matched_name[match(ehnes$Genus,
+                                                                       change$user_supplied_name)],
+                                           TRUE ~ Genus))
 
 write.csv(ehnes, "Ehnes2011.csv", 
           row.names = F)
