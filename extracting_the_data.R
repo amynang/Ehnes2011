@@ -5,7 +5,7 @@ library(tidyverse)
 library(stringr)
 
 # extract data from supplement
-ehnes0 = extract_tables("https://onlinelibrary.wiley.com/action/downloadSupplement?doi=10.1111%2Fj.1461-0248.2011.01660.x&file=ELE_1660_sm_Meta-scaling-Appendix.pdf",
+ehnes0 = extract_tables("H:\\Literature\\ele_1660_sm_meta-scaling-appendix.pdf",
                         pages = 2:48)
 beepr::beep(9)
 
